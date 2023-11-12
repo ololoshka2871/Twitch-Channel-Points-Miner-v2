@@ -153,7 +153,7 @@ class Twitch(object):
 
     def react(self, streamer):
 
-        if not streamer.is_online():
+        if not streamer.is_online:
             return
     
         json_data = copy.deepcopy(GQLOperations.UpdateViewerStreamFeedback)
