@@ -152,8 +152,11 @@ class Twitch(object):
                 f"Something went wrong during extraction of 'spade_url': {e}")
 
     def react(self, streamer):
-        json_data = copy.deepcopy(GQLOperations.UpdateViewerStreamFeedback)
 
+        if not streamer.is_online():
+            return
+    
+        json_data = copy.deepcopy(GQLOperations.UpdateViewerStreamFeedback)
         stream_info = self.get_stream_info(streamer)
         broadcast_id = stream_info["stream"]["id"],
 
@@ -815,10 +818,11 @@ class Twitch(object):
                 if streamers[i].is_react() is True:
                     res = self.react(streamer = streamers[i])
 
-                    if not res['data']['updateViewerStreamFeedback']['error']:
-                        logger.info(f"{streamers[i].username} - Reacted")
-                    else:
-                        logger.info(f"{streamers[i].username} - Not reacted ({res['data']['updateViewerStreamFeedback']['error']})")
+                    if res:
+                        if not res['data']['updateViewerStreamFeedback']['error']:
+                            logger.info(f"{streamers[i].username} - Reacted")
+                        else:
+                            logger.info(f"{streamers[i].username} - Not reacted ({res['data']['updateViewerStreamFeedback']['error']})")
                     
             self.__chuncked_sleep(300, chunk_size=chunk_size)
 
