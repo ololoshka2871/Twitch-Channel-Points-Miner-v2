@@ -36,7 +36,7 @@ class StreamerSettings(object):
         watch_streak: bool = None,
         bet: BetSettings = None,
         chat: ChatPresence = None,
-        react: bool = None,
+        react: bool = False,
     ):
         self.make_predictions = make_predictions
         self.follow_raid = follow_raid

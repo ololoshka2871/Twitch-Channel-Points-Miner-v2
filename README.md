@@ -278,7 +278,15 @@ twitch_miner = TwitchChannelPointsMiner(
                 where=Condition.LTE,            # 'by' must be [GT, LT, GTE, LTE] than value
                 value=800
             )
-        )
+        ),
+        react=True,                             # React to the streamer 
+    ),
+    reaction_settings=ReactionSettings(         # Customization of the reaction system, if used
+        reactions=[Reaction.WHAAAT,             # List of reactions to use
+            Reaction.FUNNY, 
+            Reaction.LOVE
+        ],  
+        interval_s=500,                         # Interval between reactions in seconds
     )
 )
 

@@ -13,6 +13,7 @@ from pathlib import Path
 
 from TwitchChannelPointsMiner.classes.Chat import ChatPresence, ThreadChat
 from TwitchChannelPointsMiner.classes.entities.PubsubTopic import PubsubTopic
+from TwitchChannelPointsMiner.classes.entities.Reaction import ReactionSettings
 from TwitchChannelPointsMiner.classes.entities.Streamer import (
     Streamer,
     StreamerSettings,
@@ -21,7 +22,6 @@ from TwitchChannelPointsMiner.classes.Exceptions import StreamerDoesNotExistExce
 from TwitchChannelPointsMiner.classes.Settings import FollowersOrder, Priority, Settings
 from TwitchChannelPointsMiner.classes.Twitch import Twitch
 from TwitchChannelPointsMiner.classes.WebSocketsPool import WebSocketsPool
-from TwitchChannelPointsMiner.constants import Reaction
 from TwitchChannelPointsMiner.logger import LoggerSettings, configure_loggers
 from TwitchChannelPointsMiner.utils import (
     _millify,
@@ -64,8 +64,7 @@ class TwitchChannelPointsMiner:
         "minute_watcher_thread",
         "sync_campaigns_thread",
         "ws_pool",
-        "reactions",
-        "react_interval_s",
+        "reaction_settings",
         "session_id",
         "running",
         "start_datetime",
@@ -89,10 +88,7 @@ class TwitchChannelPointsMiner:
         logger_settings: LoggerSettings = LoggerSettings(),
         # Default values for all streamers
         streamer_settings: StreamerSettings = StreamerSettings(),
-        # Use reaction from this list
-        reactions: list = [Reaction.HYPE, Reaction.FUNNY, Reaction.LOVE, Reaction.WHAAAT, Reaction.OH_NO],
-        # minimal interval between reactions (5 min by default)
-        react_interval_s: int = 300,
+        reaction_settings: ReactionSettings = ReactionSettings(),
     ):
         # Fixes TypeError: 'NoneType' object is not subscriptable
         if not username or username == "your-twitch-username":
@@ -157,8 +153,7 @@ class TwitchChannelPointsMiner:
         self.sync_campaigns_thread = None
         self.reacting = None
         self.ws_pool = None
-        self.reactions = reactions
-        self.react_interval_s = react_interval_s
+        self.reaction_settings = reaction_settings
 
         self.session_id = str(uuid.uuid4())
         self.running = False
@@ -341,7 +336,7 @@ class TwitchChannelPointsMiner:
             ):
                 self.reacting = threading.Thread(
                     target=self.twitch.sync_react,
-                    args=(self.streamers, self.reactions, self.react_interval_s,),
+                    args=(self.streamers, self.reaction_settings,),
                 )
                 self.reacting.name = "Sync reacting"
                 self.reacting.start()

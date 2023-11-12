@@ -33,12 +33,12 @@ from TwitchChannelPointsMiner.classes.Settings import (
     Settings,
 )
 from TwitchChannelPointsMiner.classes.TwitchLogin import TwitchLogin
+from TwitchChannelPointsMiner.classes.entities.Reaction import Reaction, ReactionSettings
 from TwitchChannelPointsMiner.constants import (
     CLIENT_ID,
     CLIENT_VERSION,
     URL,
     GQLOperations,
-    Reaction,
 )
 from TwitchChannelPointsMiner.utils import (
     _millify,
@@ -813,11 +813,11 @@ class Twitch(object):
                             drop.is_claimed = self.claim_drop(drop)
                             time.sleep(random.uniform(5, 10))
 
-    def sync_react(self, streamers, reactions: list[Reaction], react_interval_s = 300, chunk_size=3):
+    def sync_react(self, streamers, reaction_settings: ReactionSettings, chunk_size=3):
         while self.running:
             for i in range(0, len(streamers)):
                 if streamers[i].is_react() is True:
-                    reaction = random.choice(reactions)
+                    reaction = reaction_settings.select_reaction()
                     res = self.react(streamer = streamers[i], reaction=reaction)
 
                     if res:
@@ -829,7 +829,7 @@ class Twitch(object):
                         # random delay before next reaction 
                         self.__chuncked_sleep(random.uniform(0.0, 2.0), chunk_size=chunk_size)
                     
-            self.__chuncked_sleep(react_interval_s, chunk_size=chunk_size)
+            self.__chuncked_sleep(reaction_settings.interval_s, chunk_size=chunk_size)
 
     def sync_campaigns(self, streamers, chunk_size=3):
         campaigns_update = 0
