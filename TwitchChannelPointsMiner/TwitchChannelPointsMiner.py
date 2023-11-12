@@ -69,6 +69,7 @@ class TwitchChannelPointsMiner:
         "original_streamers",
         "logs_file",
         "queue_listener",
+        "reacting"
     ]
 
     def __init__(
@@ -147,6 +148,7 @@ class TwitchChannelPointsMiner:
         self.events_predictions = {}
         self.minute_watcher_thread = None
         self.sync_campaigns_thread = None
+        self.reacting = None
         self.ws_pool = None
 
         self.session_id = str(uuid.uuid4())
@@ -322,6 +324,19 @@ class TwitchChannelPointsMiner:
                 self.sync_campaigns_thread.name = "Sync campaigns/inventory"
                 self.sync_campaigns_thread.start()
                 time.sleep(30)
+
+            if (
+                at_least_one_value_in_settings_is(
+                    self.streamers, "react", True)
+                is True
+            ):
+                self.reacting = threading.Thread(
+                    target=self.twitch.sync_react,
+                    args=(self.streamers,),
+                )
+                self.reacting.name = "Sync reacting"
+                self.reacting.start()
+                time.sleep(5)
 
             self.minute_watcher_thread = threading.Thread(
                 target=self.twitch.send_minute_watched_events,

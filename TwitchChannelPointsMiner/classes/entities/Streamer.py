@@ -24,6 +24,7 @@ class StreamerSettings(object):
         "watch_streak",
         "bet",
         "chat",
+        "react",
     ]
 
     def __init__(
@@ -35,6 +36,7 @@ class StreamerSettings(object):
         watch_streak: bool = None,
         bet: BetSettings = None,
         chat: ChatPresence = None,
+        react: bool = None,
     ):
         self.make_predictions = make_predictions
         self.follow_raid = follow_raid
@@ -43,6 +45,7 @@ class StreamerSettings(object):
         self.watch_streak = watch_streak
         self.bet = bet
         self.chat = chat
+        self.react = react
 
     def default(self):
         for name in [
@@ -60,7 +63,7 @@ class StreamerSettings(object):
             self.chat = ChatPresence.ONLINE
 
     def __repr__(self):
-        return f"BetSettings(make_predictions={self.make_predictions}, follow_raid={self.follow_raid}, claim_drops={self.claim_drops}, claim_moments={self.claim_moments}, watch_streak={self.watch_streak}, bet={self.bet}, chat={self.chat})"
+        return f"BetSettings(make_predictions={self.make_predictions}, follow_raid={self.follow_raid}, claim_drops={self.claim_drops}, claim_moments={self.claim_moments}, watch_streak={self.watch_streak}, bet={self.bet}, chat={self.chat}, react={self.react})"
 
 
 class Streamer(object):
@@ -168,6 +171,9 @@ class Streamer(object):
 
     def stream_up_elapsed(self):
         return self.stream_up == 0 or ((time.time() - self.stream_up) > 120)
+
+    def is_react(self):
+        return self.settings.react
 
     def drops_condition(self):
         return (

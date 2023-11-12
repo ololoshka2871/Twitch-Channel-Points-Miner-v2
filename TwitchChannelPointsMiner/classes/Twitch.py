@@ -151,6 +151,26 @@ class Twitch(object):
             logger.error(
                 f"Something went wrong during extraction of 'spade_url': {e}")
 
+    def react(self, streamer):
+        json_data = copy.deepcopy(GQLOperations.UpdateViewerStreamFeedback)
+
+        stream_info = self.get_stream_info(streamer)
+        broadcast_id = stream_info["stream"]["id"],
+
+        json_data["variables"] = {
+            "input": {
+                "broadcastID": broadcast_id[0],
+                "viewerID": str(self.twitch_login.get_user_id()),
+                "channelID": streamer.channel_id,
+                "feedback": [
+                    "WHAAAT"
+                ]
+            }
+        }
+
+        response = self.post_gql_request(json_data)
+        return response
+
     def get_broadcast_id(self, streamer):
         json_data = copy.deepcopy(GQLOperations.WithIsStreamLiveQuery)
         json_data["variables"] = {"id": streamer.channel_id}
@@ -788,6 +808,19 @@ class Twitch(object):
                         if drop.is_claimable is True:
                             drop.is_claimed = self.claim_drop(drop)
                             time.sleep(random.uniform(5, 10))
+
+    def sync_react(self, streamers, chunk_size=3):
+        while self.running:
+            for i in range(0, len(streamers)):
+                if streamers[i].is_react() is True:
+                    res = self.react(streamer = streamers[i])
+
+                    if not res['data']['updateViewerStreamFeedback']['error']:
+                        logger.info(f"{streamers[i].username} - Reacted")
+                    else:
+                        logger.info(f"{streamers[i].username} - Not reacted ({res['data']['updateViewerStreamFeedback']['error']})")
+                    
+            self.__chuncked_sleep(300, chunk_size=chunk_size)
 
     def sync_campaigns(self, streamers, chunk_size=3):
         campaigns_update = 0
