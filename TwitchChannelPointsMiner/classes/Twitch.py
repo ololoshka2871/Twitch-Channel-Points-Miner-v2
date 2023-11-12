@@ -38,6 +38,7 @@ from TwitchChannelPointsMiner.constants import (
     CLIENT_VERSION,
     URL,
     GQLOperations,
+    Reaction,
 )
 from TwitchChannelPointsMiner.utils import (
     _millify,
@@ -151,7 +152,7 @@ class Twitch(object):
             logger.error(
                 f"Something went wrong during extraction of 'spade_url': {e}")
 
-    def react(self, streamer):
+    def react(self, streamer, reaction: Reaction):
 
         if not streamer.is_online:
             return
@@ -166,7 +167,7 @@ class Twitch(object):
                 "viewerID": str(self.twitch_login.get_user_id()),
                 "channelID": streamer.channel_id,
                 "feedback": [
-                    "WHAAAT"
+                    reaction.name
                 ]
             }
         }
@@ -812,19 +813,23 @@ class Twitch(object):
                             drop.is_claimed = self.claim_drop(drop)
                             time.sleep(random.uniform(5, 10))
 
-    def sync_react(self, streamers, chunk_size=3):
+    def sync_react(self, streamers, reactions: list[Reaction], react_interval_s = 300, chunk_size=3):
         while self.running:
             for i in range(0, len(streamers)):
                 if streamers[i].is_react() is True:
-                    res = self.react(streamer = streamers[i])
+                    reaction = random.choice(reactions)
+                    res = self.react(streamer = streamers[i], reaction=reaction)
 
                     if res:
                         if not res['data']['updateViewerStreamFeedback']['error']:
-                            logger.info(f"{streamers[i].username} - Reacted")
+                            logger.info(f"{streamers[i].username} - Reacted ('{reaction.name}')")
                         else:
                             logger.info(f"{streamers[i].username} - Not reacted ({res['data']['updateViewerStreamFeedback']['error']})")
+                        
+                        # random delay before next reaction 
+                        self.__chuncked_sleep(random.uniform(0.0, 2.0), chunk_size=chunk_size)
                     
-            self.__chuncked_sleep(300, chunk_size=chunk_size)
+            self.__chuncked_sleep(react_interval_s, chunk_size=chunk_size)
 
     def sync_campaigns(self, streamers, chunk_size=3):
         campaigns_update = 0

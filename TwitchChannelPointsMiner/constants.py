@@ -1,4 +1,7 @@
 # Twitch endpoints
+from enum import Enum
+
+
 URL = "https://www.twitch.tv"
 IRC = "irc.chat.twitch.tv"
 IRC_PORT = 6667
@@ -207,3 +210,10 @@ class GQLOperations:
             }
         },
     }
+
+class Reaction(Enum):
+    HYPE = "HYPE",
+    FUNNY = "FUNNY",
+    LOVE = "LOVE",
+    WHAAAT = "WHAAAT",
+    OH_NO = "OH_NO",
